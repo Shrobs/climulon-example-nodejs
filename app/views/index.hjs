@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>{{ title }}</h1>
+    <p>Congratz, you provisionned your first infrastructure with Climulon</p>
+    <p>This page has been requested <strong>{{ counter }} times</strong> <= this is saved in <font color="#D82F27"><strong>Redis</strong></font>.</p>
+  </body>
+</html>
