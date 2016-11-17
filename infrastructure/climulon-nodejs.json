@@ -8,6 +8,7 @@
          "ComputeStack": "False",
          "StackParameters": {
             "ElbName": "climulon-nodejs",
+            "ElbHealthcheckTarget": "HTTP:80/healthcheck",
             "VpcCidrBlock": "10.99.0.0/16",
             "SubnetAz1Cidr": "10.99.0.0/24",
             "SubnetAz2Cidr": "10.99.1.0/24"

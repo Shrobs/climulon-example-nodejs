@@ -6,6 +6,10 @@
       "Type": "String",
       "Description": "Name of the front-facing ELB"
     },
+    "ElbHealthcheckTarget": {
+      "Type": "String",
+      "Description": "Target of the ELB healthcheck"
+    },
     "VpcCidrBlock": {
       "Type": "String",
       "Description": "CIDR block of the provisionned VPC",
@@ -169,7 +173,9 @@
           }
         ],
         "HealthCheck": {
-          "Target": "HTTP:80/",
+          "Target": {
+            "Ref": "ElbHealthcheckTarget"
+          },
           "HealthyThreshold": "2",
           "UnhealthyThreshold": "5",
           "Interval": "20",
