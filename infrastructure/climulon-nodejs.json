@@ -1,0 +1,77 @@
+{
+   "infrastructureTemplates": [
+      {
+         "StackTemplate": "templates/infrastructure.json",
+         "StackName": "INFRA-Climulon-NodeJS",
+         "StackOrder": "1",
+         "StackRegion": "eu-central-1",
+         "ComputeStack": "False",
+         "StackParameters": {
+            "ElbName": "climulon-nodejs",
+            "VpcCidrBlock": "10.99.0.0/16",
+            "SubnetAz1Cidr": "10.99.0.0/24",
+            "SubnetAz2Cidr": "10.99.1.0/24"
+         }
+      },
+      {
+         "StackTemplate": "templates/infrastructureREDIS.json",
+         "StackName": "REDIS-Climulon-NodeJS",
+         "StackOrder": "2",
+         "StackRegion": "eu-central-1",
+         "ComputeStack": "False",
+         "StackParameters": {
+            "RedisClusterName": "climulon-nodejs",
+            "RedisVersion": "3.2.4",
+            "RedisNodeType": "cache.t2.micro",
+            "RedisPort": "6379",
+            "VpcId": {
+               "Ref": "VPC"
+            },
+            "SubnetIds": {
+               "Ref": "SUBNETIDS"
+            },
+            "SharedSecurityGroup" : {
+               "Ref": "SharedSg"
+            }
+         }
+      },
+      {
+         "StackTemplate": "templates/infrastructureECS.json",
+         "StackName": "ECS-Climulon-NodeJS",
+         "StackOrder": "3",
+         "StackRegion": "eu-central-1",
+         "ComputeStack": "True",
+         "StackParameters": {
+            "EcsClusterName": "climulon-nodejs",
+            "EcsAmiId": "ami-f562909a",
+            "EcsInstanceType": "t2.micro",
+            "VpcId": {
+               "Ref": "VPC"
+            },
+            "SubnetIds": {
+               "Ref": "SUBNETIDS"
+            },
+            "AsgMaxSize": "2",
+            "SharedSecurityGroup" : {
+               "Ref": "SharedSg"
+            },
+            "ElbSecurityGroup": {
+               "Ref": "ELBSg"
+            },
+            "LogRetentionPeriod" : "365"
+         }
+      }
+   ],
+   "taskDefsTemplates": [
+      "taskDefs/taskDef-climulon-nodejs.json"
+   ],
+   "servicesTemplates": [
+      "services/service-climulon-nodejs.json"
+   ],
+   "taskDefsParameters": {
+      "TASK_DEF_NAME_APIIO": "climulon-nodejs",
+      "SERVICE_NAME_APIIO": "climulon-nodejs",
+      "LOG_REGION": "eu-central-1",
+      "IMAGE_EXPRESS": "shrobs/climulon-example-nodejs:latest"
+   }
+}

@@ -1,0 +1,306 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Template for Climulon NodeJs Example (ECS)",
+  "Parameters": {
+    "EcsAmiId": {
+      "Type": "String",
+      "Description": "ECS AMI Id"
+    },
+    "EcsInstanceType": {
+      "Type": "String",
+      "Description": "ECS EC2 instance type",
+      "AllowedValues": [
+        "t2.micro",
+        "t2.small",
+        "t2.medium",
+        "t2.large",
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge",
+        "m4.4xlarge",
+        "m4.10xlarge",
+        "m3.medium",
+        "m3.large",
+        "m3.xlarge",
+        "m3.2xlarge",
+        "c4.large",
+        "c4.xlarge",
+        "c4.2xlarge",
+        "c4.4xlarge",
+        "c4.8xlarge",
+        "c3.large",
+        "c3.xlarge",
+        "c3.2xlarge",
+        "c3.4xlarge",
+        "c3.8xlarge",
+        "r3.large",
+        "r3.xlarge",
+        "r3.2xlarge",
+        "r3.4xlarge",
+        "r3.8xlarge",
+        "i2.xlarge",
+        "i2.2xlarge",
+        "i2.4xlarge",
+        "i2.8xlarge"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    },
+    "VpcId": {
+      "Type": "String",
+      "Description": "VPC Id of the VPS created in the shared template"
+    },
+    "SubnetIds": {
+      "Type": "CommaDelimitedList",
+      "Description": "Ids of the subnets in the shared template"
+    },
+    "AsgMaxSize": {
+      "Type": "Number",
+      "Description": "Maximum size and initial Desired Capacity of ECS Auto Scaling Group"
+    },
+    "EcsClusterName": {
+      "Type": "String",
+      "Description": "ECS Cluster Name"
+    },
+    "SharedSecurityGroup": {
+      "Type": "String",
+      "Description": "Shared Security group for ECS/REDIS in shared template"
+    },
+    "ElbSecurityGroup": {
+      "Type": "String",
+      "Description": "ELB Security group in shared template"
+    },
+    "LogRetentionPeriod": {
+      "Type": "Number",
+      "Description": "Log retention period in days"
+    }
+  },
+  "Resources": {
+    "EcsSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ECS Allowed Ports",
+        "VpcId": {
+          "Ref": "VpcId"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "1",
+            "ToPort": "65535",
+            "SourceSecurityGroupId": {
+              "Ref": "ElbSecurityGroup"
+            }
+          }
+        ]
+      }
+    },
+    "EcsInstanceLc": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "ImageId": {
+          "Ref": "EcsAmiId"
+        },
+        "InstanceType": {
+          "Ref": "EcsInstanceType"
+        },
+        "AssociatePublicIpAddress": true,
+        "IamInstanceProfile": {
+          "Ref": "ECSProfile"
+        },
+        "KeyName": "OPS",
+        "SecurityGroups": [
+          {
+            "Ref": "EcsSecurityGroup"
+          },
+          {
+            "Ref": "SharedSecurityGroup"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "echo ECS_CLUSTER=",
+                {
+                  "Ref": "EcsClusterName"
+                },
+                " >> /etc/ecs/ecs.config\n",
+                "yum install perl-Switch perl-DateTime perl-Sys-Syslog perl-LWP-Protocol-https perl-Digest-SHA unzip -y\n",
+                "mkdir /metrics\n",
+                "cd /metrics\n",
+                "curl http://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.1.zip -O\n",
+                "unzip CloudWatchMonitoringScripts-1.2.1.zip\n",
+                "rm -f CloudWatchMonitoringScripts-1.2.1.zip\n",
+                "{ echo \"*/1 * * * * /metrics/aws-scripts-mon/mon-put-instance-data.pl --disk-space-util --disk-path=/ --from-cron --auto-scaling\"; } | crontab -\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "EcsInstanceAsg": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "VPCZoneIdentifier": {
+          "Ref": "SubnetIds"
+        },
+        "LaunchConfigurationName": {
+          "Ref": "EcsInstanceLc"
+        },
+        "MinSize": "1",
+        "MaxSize": {
+          "Ref": "AsgMaxSize"
+        },
+        "DesiredCapacity": {
+          "Ref": "AsgMaxSize"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "ECS Instance - ",
+                  {
+                    "Ref": "AWS::StackName"
+                  }
+                ]
+              ]
+            },
+            "PropagateAtLaunch": true
+          }
+        ]
+      },
+      "UpdatePolicy": {
+        "AutoScalingScheduledAction": {
+          "IgnoreUnmodifiedGroupSizeProperties": "true"
+        },
+        "AutoScalingRollingUpdate": {
+          "MinInstancesInService": "1",
+          "MaxBatchSize": "1",
+          "PauseTime": "PT10M"
+        }
+      }
+    },
+    "ECSRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "policy"
+                ]
+              ]
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "cloudwatch:PutMetricData",
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "ec2:DescribeTags",
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "ECSProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "ECSRole"
+          }
+        ]
+      }
+    },
+    "DiskSpaceAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmDescription": "Low Available disk space",
+        "AlarmName": {
+          "Fn::Join": [
+            " - ",
+            [
+              "Low Disk Space",
+              {
+                "Ref": "EcsClusterName"
+              }
+            ]
+          ]
+        },
+        "Dimensions": [
+          {
+            "Name": "MountPath",
+            "Value": "/"
+          },
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": {
+              "Ref": "EcsInstanceAsg"
+            }
+          },
+          {
+            "Name": "Filesystem",
+            "Value": "/dev/xvda1"
+          }
+        ],
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "EvaluationPeriods": "1",
+        "MetricName": "DiskSpaceUtilization",
+        "Namespace": "System/Linux",
+        "Statistic": "Maximum",
+        "Period": "60",
+        "Threshold": "70",
+        "Unit": "Percent"
+      }
+    },
+    "LogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Ref": "EcsClusterName"
+        },
+        "RetentionInDays": {
+          "Ref": "LogRetentionPeriod"
+        }
+      }
+    }
+  }
+}

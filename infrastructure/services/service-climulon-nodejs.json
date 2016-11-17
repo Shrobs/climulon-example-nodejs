@@ -1,0 +1,26 @@
+{
+    "cluster": {
+        "Ref": "EcsClusterName"
+    },
+    "serviceName": {
+        "Ref": "SERVICE_NAME_APIIO"
+    },
+    "taskDefinition": {
+        "Ref": "TASK_DEF_NAME_APIIO"
+    },
+    "loadBalancers": [
+        {
+            "containerName": "express",
+            "containerPort": 3000,
+            "loadBalancerName": {
+                "Ref": "ELBName"
+            }
+        }
+    ],
+    "desiredCount": 2,
+    "role": "arn:aws:iam::759801820406:role/ecsServiceRole",
+    "deploymentConfiguration": {
+        "maximumPercent": 200,
+        "minimumHealthyPercent": 50
+    }
+}

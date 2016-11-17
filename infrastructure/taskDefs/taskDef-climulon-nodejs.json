@@ -1,0 +1,58 @@
+{
+  "family": {
+    "Ref": "TASK_DEF_NAME_APIIO"
+  },
+  "taskRoleArn": "",
+  "containerDefinitions": [
+    {
+      "name": "express",
+      "image": {
+        "Ref": "IMAGE_EXPRESS"
+      },
+      "volumesFrom": [],
+      "memory": 995,
+      "cpu": 1024,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "command": [
+        "npm",
+        "start"
+      ],
+      "workingDirectory": "/src",
+      "essential": true,
+      "mountPoints": [],
+      "environment": [
+        {
+          "name": "REDIS_PORT_6379_TCP_ADDR",
+          "value": {
+            "Ref": "RedisURL"
+          }
+        },
+        {
+          "name": "REDIS_PORT_6379_TCP_PORT",
+          "value": {
+            "Ref": "RedisPort"
+          }
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": {
+            "Ref": "EcsClusterName"
+          },
+          "awslogs-region": {
+            "Ref" : "LOG_REGION"
+          },
+          "awslogs-stream-prefix": "express"
+        }
+      }
+    }
+  ],
+  "volumes": []
+}
