@@ -4,7 +4,7 @@ This readme will describe in details how to map the infrastructure in code and h
 
 ## File hierarchy
 This is the ideal file hierarchy under which all the infrastructure files are stored :
-- **templates** : This folder contains the cloudformation templates that describes each stack (networking, ecs, redis...)
+- **templates** : This folder contains the Cloudformation templates that describes each stack (networking, ecs, redis...)
 - **taskDefs** : This folder contains the description of the [task definitions](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_defintions.html) that describes the container groups
 - **services** : This folder contains the description of the [services](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html) that will start the [task definitions](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_defintions.html) in ECS
 - **root** : The root folder contains the **master config files**, that **Climulon** uses to know which set of files to use, and contains the variables that will override those that are in all of the other files (templates, taskDefs and services).
@@ -35,13 +35,13 @@ The `Environment` value is gonna be replaced by the value of the `foobar` parame
 
 ### Templates
 
-**Climulon** uses Cloudformation templates to provision ressources in AWS.  
+**Climulon** uses Cloudformation templates to provision resources in AWS.  
 
 Here are some guidelines on how to write your Cloudformation templates :  
 
 1. In order to harness the full potential of **Climulon**, each Cloudformation template should be as decoupled as possible.
-Compute ressources should be kept in their own template, each persistency layer on its own template (on-disk/in-memory), and shared networking template should contain the ressources that do net get frequently updated and are required by multiple templates.  
-The shared template should also include glue ressources that allow stacks to communicate with each other.
+Compute resources should be kept in their own template, each persistency layer on its own template (on-disk/in-memory), and shared networking template should contain the resources that do net get frequently updated and are required by multiple templates.  
+The shared template should also include glue resources that allow stacks to communicate with each other.
   - Example : The ECS stack need to be able to reach the REDIS stack. In order to allow communication without coupling, a security group is to be created in the shared to template, and both the ECS and REDIS template should use it for communication. If the security group is added in any of the ECS or REDIS stack, the deletion of the stack containing it will be blocked, since the other stack will be dependent on the said security group. Adding the security group to the shared template lowers the coupling, and allows simplifies stack provision/decommission.
 2. Templates should be as alterable as possible via their parameters. That will allow using the same templates for multiple environments (prod, stage, test...). 
 
@@ -312,8 +312,8 @@ I.e
 }
 ```
 
-**Climulon** does not resolve all the references in one go, it only resolves them when it needs to. If **Climulon** is to start provisionning a stack, it will try to resolve all the variables that are related to that stack, then proceed with creating it.  
-**Climulon** gets the subtitution values from three sources :
+**Climulon** does not resolve all the references in one go, it only resolves them when it needs to. If **Climulon** is to start provisioning a stack, it will try to resolve all the variables that are related to that stack, then proceed with creating it.  
+**Climulon** gets the substitution values from three sources :
 - The output keys/values of the previously created/existing stacks
 - The StackParameters keys/values of the stacks in the MCF
 - The globalParameters keys/values in the MCF
