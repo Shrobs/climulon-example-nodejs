@@ -3,10 +3,10 @@
         "Ref": "EcsClusterName"
     },
     "serviceName": {
-        "Ref": "SERVICE_NAME_APIIO"
+        "Ref": "SERVICE_NAME"
     },
     "taskDefinition": {
-        "Ref": "TASK_DEF_NAME_APIIO"
+        "Ref": "TASK_DEF_NAME"
     },
     "loadBalancers": [
         {

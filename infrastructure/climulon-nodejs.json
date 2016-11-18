@@ -70,8 +70,8 @@
       "services/service-climulon-nodejs.json"
    ],
    "globalParameters": {
-      "TASK_DEF_NAME_APIIO": "climulon-nodejs",
-      "SERVICE_NAME_APIIO": "climulon-nodejs",
+      "TASK_DEF_NAME": "climulon-nodejs",
+      "SERVICE_NAME": "climulon-nodejs",
       "LOG_REGION": "eu-central-1",
       "IMAGE_EXPRESS": "shrobs/climulon-example-nodejs:latest"
    }

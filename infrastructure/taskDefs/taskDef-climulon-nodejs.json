@@ -1,6 +1,6 @@
 {
   "family": {
-    "Ref": "TASK_DEF_NAME_APIIO"
+    "Ref": "TASK_DEF_NAME"
   },
   "taskRoleArn": "",
   "containerDefinitions": [
