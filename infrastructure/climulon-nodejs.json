@@ -69,7 +69,7 @@
    "servicesTemplates": [
       "services/service-climulon-nodejs.json"
    ],
-   "taskDefsParameters": {
+   "globalParameters": {
       "TASK_DEF_NAME_APIIO": "climulon-nodejs",
       "SERVICE_NAME_APIIO": "climulon-nodejs",
       "LOG_REGION": "eu-central-1",
