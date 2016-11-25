@@ -107,7 +107,6 @@
         "IamInstanceProfile": {
           "Ref": "ECSProfile"
         },
-        "KeyName": "OPS",
         "SecurityGroups": [
           {
             "Ref": "EcsSecurityGroup"
