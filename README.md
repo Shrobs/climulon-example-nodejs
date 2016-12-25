@@ -1,5 +1,7 @@
 # Climulon example NodeJS
 
+[![Build Status](https://travis-ci.org/Shrobs/climulon-example-nodejs.svg?branch=master)](https://travis-ci.org/Shrobs/climulon-example-nodejs)
+
 This is a micro nodejs/redis app that showcases how **Climulon** is used to provision/decommission infrastructure and run docker apps in a single command.  
 The Node app this showcase is based on was written by [Pascal Cremer](https://github.com/b00giZm)
 
