@@ -21,11 +21,25 @@ Make sure you have power user/admin access attached to the credentials you are u
 ### How do I provision the infrastructure and deploy this app with **Climulon**
 
 To provision the infrastructure and deploy this app with **Climulon**, ou just have to run this command :
+
+**Docker** :
+```
+docker run -v ~/.aws:/root/.aws -v ./infrastructure:/infrastructure shrobs/climulon climulon provision -c /infrastructure/climulon-nodejs.json
+```
+
+**Locally** :
 ```
 climulon provision -c ./infrastructure/climulon-nodejs.json
 ```
 
 Then, check the progress of the docker containers deployment via this command :
+
+**Docker** :
+```
+docker run -v ~/.aws:/root/.aws -v ./infrastructure:/infrastructure shrobs/climulon climulon status -c /infrastructure/climulon-nodejs.json
+```
+
+**Locally** :
 ```
 climulon status -c ./infrastructure/climulon-nodejs.json
 ```
@@ -63,10 +77,24 @@ By having independent stacks we are reducing coupling and increasing cohesion.
 Climulon allow the provision/decommission of a single/multiple stacks inside the whole infrastructure, making operating changes easy.
 
 Example: Decommissioning the ECS cluster, but keeping the networking infrastructure and Redis running :
+
+**Docker** :
+```
+docker run -v ~/.aws:/root/.aws -v ./infrastructure:/infrastructure shrobs/climulon climulon decommission -c /infrastructure/climulon-nodejs.json --stacks ECS-Climulon-NodeJS
+```
+
+**Locally** :
 ```
 climulon decommission -c ./infrastructure/climulon-nodejs.json --stacks ECS-Climulon-NodeJS
 ```
 Recreating the ECS cluster, and connecting it with the existing networking infrastructure and Redis stacks :
+
+**Docker** :
+```
+docker run -v ~/.aws:/root/.aws -v ./infrastructure:/infrastructure shrobs/climulon climulon provision -c /infrastructure/climulon-nodejs.json --stacks ECS-Climulon-NodeJS
+```
+
+**Locally** :
 ```
 climulon provision -c ./infrastructure/climulon-nodejs.json --stacks ECS-Climulon-NodeJS
 ```
@@ -87,6 +115,13 @@ Head this way, for a more detailed description of how the infrastructure config/
 
 ### I want to remove everything Climulon created, what do I do ?
 To decommission the whole infrastructure running this app, run the following command :
+
+**Docker** :
+```
+docker run -v ~/.aws:/root/.aws -v ./infrastructure:/infrastructure shrobs/climulon climulon decommission -c /infrastructure/climulon-nodejs.json
+```
+
+**Locally** :
 ```
 climulon decommission -c ./infrastructure/climulon-nodejs.json
 ```
