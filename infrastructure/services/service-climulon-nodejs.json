@@ -18,7 +18,9 @@
         }
     ],
     "desiredCount": 2,
-    "role": "arn:aws:iam::759801820406:role/ecsServiceRole",
+    "role": {
+        "Ref": "ECSServiceRole"
+    },
     "deploymentConfiguration": {
         "maximumPercent": 200,
         "minimumHealthyPercent": 50
